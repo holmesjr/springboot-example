@@ -3,6 +3,7 @@ services:
 
   app:
     build: .
+    restart: always
     ports:
       - "8080:8080"
 
@@ -12,3 +13,4 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: db_example
