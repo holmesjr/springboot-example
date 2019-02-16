@@ -15,11 +15,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @RestController
 public class Application {
 
-    public void setUserRepository(UserRepository userRepository) {
+    @Autowired
+    public Application(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    @Autowired
     private UserRepository userRepository;
 
     @RequestMapping("/")

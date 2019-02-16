@@ -13,12 +13,10 @@ import java.util.Optional;
 
 public class ApplicationTest {
 
-    private Application app = new Application();
+    private Application app = new Application(new MockRepository());
 
-    //@Test
+    @Test
     public void outputsJSONToTheBrowser() {
-
-        app.setUserRepository(new MockRepository());
 
         assertEquals("[{\"name\":\"Fred\",\"email\":\"fred@here.com\"},{\"name\":\"Jill\",\"email\":\"jill@here.com\"}]", app.home());
     }
