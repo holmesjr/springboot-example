@@ -6,7 +6,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.ldap.support.LdapUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,22 +50,17 @@ public class Application {
         contextSource.setUrl("ldap://localhost:8389/");
         contextSource.setBase("dc=springframework,dc=org");
         contextSource.afterPropertiesSet();
-        //LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+        LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
         try {
-            // USERS LIKE THIS FOR NOW uid=ben,ou=people,dc=springframework,dc=org
-            ctx = contextSource.getContext(
-                    "uid=" + username + ",ou=people,dc=springframework,dc=org",
-                    password);
+            ldapTemplate.afterPropertiesSet();
         } catch (Exception e) {
-            // Context creation failed - authentication did not succeed
-            return "DENIED: " + e.toString();
-        } finally {
-            // It is imperative that the created DirContext instance is always closed
-            LdapUtils.closeContext(ctx);
+            e.printStackTrace();
         }
 
+        boolean success = ldapTemplate.authenticate("", "(uid=" + username + ")", password);
+
         //this is where we need to respond with the JWT.
-        return "SUCCEEDED";
+        return success ? "SUCCEEDED" : "FAILED";
     }
 
 
