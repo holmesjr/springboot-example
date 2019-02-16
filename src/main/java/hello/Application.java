@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.ldap.support.LdapUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +51,7 @@ public class Application {
         contextSource.setUrl("ldap://localhost:8389/");
         contextSource.setBase("dc=springframework,dc=org");
         contextSource.afterPropertiesSet();
+        //LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
         try {
             // USERS LIKE THIS FOR NOW uid=ben,ou=people,dc=springframework,dc=org
             ctx = contextSource.getContext(
@@ -63,6 +65,7 @@ public class Application {
             LdapUtils.closeContext(ctx);
         }
 
+        //this is where we need to respond with the JWT.
         return "SUCCEEDED";
     }
 
