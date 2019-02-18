@@ -1,5 +1,7 @@
 package hello;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -51,16 +53,38 @@ public class Application {
         contextSource.setBase("dc=springframework,dc=org");
         contextSource.afterPropertiesSet();
         LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+
         try {
             ldapTemplate.afterPropertiesSet();
+            boolean success = ldapTemplate.authenticate("", "(uid=" + username + ")", password);
+            if(success) {
+                // We'd change this to asymmetric if you wanted to verify out in the client services
+                Algorithm algorithmHS = Algorithm.HMAC256("secret");
+                String token = JWT.create()
+                        .withIssuer("example-auth-service")
+                        .withSubject(username)
+                        .sign(algorithmHS);
+                return token;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        boolean success = ldapTemplate.authenticate("", "(uid=" + username + ")", password);
+        //This would set an error code if it failed.
+        return "FAILED TO AUTHENTICATE";
+    }
 
-        //this is where we need to respond with the JWT.
-        return success ? "SUCCEEDED" : "FAILED";
+    @RequestMapping("/verify")
+    public String verify(@RequestParam("token") String token) {
+        // We'd change this to asymmetric if you wanted to verify out in the client services
+        Algorithm algorithmHS = Algorithm.HMAC256("secret");
+        String user = JWT.require(Algorithm.HMAC256("secret"))
+                .build()
+                .verify(token)
+                .getSubject();
+
+        //This would set an error code if it failed.
+        return user != null ? user : "FAILED TO VERIFY";
     }
 
 
