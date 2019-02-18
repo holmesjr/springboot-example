@@ -8,14 +8,16 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.web.client.RestTemplate;
 
 import javax.naming.directory.DirContext;
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootApplication
 @RestController
@@ -29,7 +31,19 @@ public class Application {
     private UserRepository userRepository;
 
     @RequestMapping("/")
-    public String home() {
+    public String home(@RequestHeader(value="Authorization") String authorizationHeader) {
+
+        if(authorizationHeader != null){
+            final String uri = "http://localhost:8080/verify/{token}";
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("token", authorizationHeader.replace("Bearer ",""));
+
+            RestTemplate restTemplate = new RestTemplate();
+            String result = restTemplate.getForObject(uri, String.class, params);
+            if(result.equals("FAILED TO VERIFY")){
+                return "DENIED";
+            }
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode users = mapper.createArrayNode();
@@ -74,8 +88,8 @@ public class Application {
         return "FAILED TO AUTHENTICATE";
     }
 
-    @RequestMapping("/verify")
-    public String verify(@RequestParam("token") String token) {
+    @RequestMapping("/verify/{token}")
+    public String verify(@PathVariable("token") String token) {
         // We'd change this to asymmetric if you wanted to verify out in the client services
         Algorithm algorithmHS = Algorithm.HMAC256("secret");
         String user = JWT.require(Algorithm.HMAC256("secret"))
