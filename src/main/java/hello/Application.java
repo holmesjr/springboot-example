@@ -32,6 +32,10 @@ public class Application {
     @RequestMapping("/")
     public String home(@RequestHeader(value="Authorization") String authorizationHeader) {
 
+        // None of this should be here.
+        // This code doesn't care about Authorisation: it cares only about getting data from the repo.
+        // So we need to find a way to get it out into another place to be included by Spring
+
         if(authorizationHeader != null){
             final String uri = "http://localhost:8080/verify/{token}";
             Map<String, String> params = new HashMap<String, String>();
