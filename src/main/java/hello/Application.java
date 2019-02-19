@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.web.client.RestTemplate;
 
 import javax.naming.directory.DirContext;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
