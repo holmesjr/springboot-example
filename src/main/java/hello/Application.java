@@ -12,11 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.web.client.RestTemplate;
 
 import javax.naming.directory.DirContext;
-import java.util.HashMap;
-import java.util.Map;
 
 @SpringBootApplication
 @RestController
@@ -30,19 +27,7 @@ public class Application {
     private UserRepository userRepository;
 
     @RequestMapping("/")
-    public String home(@RequestHeader(value="Authorization") String authorizationHeader) {
-
-        if(authorizationHeader != null){
-            final String uri = "http://localhost:8080/verify/{token}";
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("token", authorizationHeader.replace("Bearer ",""));
-
-            RestTemplate restTemplate = new RestTemplate();
-            String result = restTemplate.getForObject(uri, String.class, params);
-            if(result.equals("FAILED TO VERIFY")){
-                return "DENIED";
-            }
-        }
+    public String home() {
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode users = mapper.createArrayNode();
