@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.ldap.core.LdapTemplate;
@@ -43,7 +44,7 @@ public class Application {
     }
 
     @RequestMapping("/authenticate")
-    public String authenticate(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public String authenticate(@RequestParam("username") String username, @RequestParam("password") String password, @Value("${JWTSECRET}") String secretForJWT) {
 
         DirContext ctx = null;
         LdapContextSource contextSource = new LdapContextSource();
@@ -57,7 +58,7 @@ public class Application {
             boolean success = ldapTemplate.authenticate("", "(uid=" + username + ")", password);
             if(success) {
                 // We'd change this to asymmetric if you wanted to verify out in the client services
-                Algorithm algorithmHS = Algorithm.HMAC256("secret");
+                Algorithm algorithmHS = Algorithm.HMAC256(secretForJWT);
                 String token = JWT.create()
                         .withIssuer("example-auth-service")
                         .withSubject(username)
@@ -73,10 +74,10 @@ public class Application {
     }
 
     @RequestMapping("/verify/{token}")
-    public String verify(@PathVariable("token") String token) {
+    public String verify(@PathVariable("token") String token, @Value("${JWTSECRET}") String secretForJWT) {
         // We'd change this to asymmetric if you wanted to verify out in the client services
-        Algorithm algorithmHS = Algorithm.HMAC256("secret");
-        String user = JWT.require(Algorithm.HMAC256("secret"))
+        Algorithm algorithmHS = Algorithm.HMAC256(secretForJWT);
+        String user = JWT.require(algorithmHS)
                 .build()
                 .verify(token)
                 .getSubject();

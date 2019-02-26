@@ -1,4 +1,4 @@
-version: "3"
+version: "3.5"
 services:
 
   app:
@@ -7,6 +7,10 @@ services:
     ports:
       - "8080:8080"
       - "8389:8389"
+    env_file:
+      - .env
+    secrets:
+      - my_secret
 
   db:
     image: mysql
@@ -15,3 +19,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: db_example
+
+secrets:
+  my_secret:
+    file: ./secret_data

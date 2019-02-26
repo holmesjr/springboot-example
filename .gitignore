@@ -1,3 +1,9 @@
+# secret stuff
+secret_data
+
+# env files
+.env
+
 # Compiled class file
 *.class
 target
@@ -25,3 +31,4 @@ target
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+.env
