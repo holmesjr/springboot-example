@@ -10,7 +10,8 @@ services:
     env_file:
       - .env
     secrets:
-      - my_secret
+      - public_key
+      - private_key
 
   db:
     image: mysql
@@ -21,5 +22,7 @@ services:
       MYSQL_DATABASE: db_example
 
 secrets:
-  my_secret:
-    file: ./secret_data
+  public_key:
+    file: ./secrets/public_key.pem
+  private_key:
+    file: ./secrets/private_key.pem
