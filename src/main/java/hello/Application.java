@@ -3,6 +3,8 @@ package hello;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import hello.services.Authenticator;
+import hello.services.TokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -26,11 +28,15 @@ import java.util.Base64;
 public class Application {
 
     @Autowired
-    public Application(UserRepository userRepository) {
+    public Application(UserRepository userRepository, Authenticator authenticator, TokenGenerator tokenGenerator) {
         this.userRepository = userRepository;
+        this.authenticator = authenticator;
+        this.tokenGenerator = tokenGenerator;
     }
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final Authenticator authenticator;
+    private final TokenGenerator tokenGenerator;
 
     @RequestMapping("/")
     public String home() {
@@ -49,30 +55,11 @@ public class Application {
     }
 
     @RequestMapping("/authenticate")
-    public String authenticate(@RequestParam("username") String username, @RequestParam("password") String password, @Value("${RSAPRIVATEKEY}") String privateKeyContent) {
-
-        LdapContextSource contextSource = new LdapContextSource();
-        contextSource.setUrl("ldap://localhost:8389/");
-        contextSource.setBase("dc=springframework,dc=org");
-        contextSource.afterPropertiesSet();
-        LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+    public String authenticate(@RequestParam("username") String username, @RequestParam("password") String password) {
 
         try {
-            ldapTemplate.afterPropertiesSet();
-            boolean success = ldapTemplate.authenticate("", "(uid=" + username + ")", password);
-            if(success) {
-
-                KeyFactory kf = KeyFactory.getInstance("RSA");
-                PKCS8EncodedKeySpec keySpecPKCS8 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyContent));
-                RSAPrivateKey privKey = (RSAPrivateKey)kf.generatePrivate(keySpecPKCS8);
-
-                Algorithm algorithm = Algorithm.RSA512(null, privKey);
-
-                String token = JWT.create()
-                        .withIssuer("example-auth-service")
-                        .withSubject(username)
-                        .sign(algorithm);
-                return token;
+            if(authenticator.authenticate(username, password)) {
+                return tokenGenerator.generate(username);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,9 @@
 package hello;
 
 import static org.junit.Assert.*;
+
+import hello.services.Authenticator;
+import hello.services.TokenGenerator;
 import org.junit.Test;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -13,12 +16,47 @@ import java.util.Optional;
 
 public class ApplicationTest {
 
-    private Application app = new Application(new MockRepository());
+    private Application app = new Application(new MockRepository(), new MockAuthenticator(), new MockGenerator());
+    private Application failingApp = new Application(new MockRepository(), new MockFailingAuthenticator(), new MockGenerator());
 
     @Test
     public void outputsJSONToTheBrowser() {
 
         assertEquals("[{\"name\":\"Fred\",\"email\":\"fred@here.com\"},{\"name\":\"Jill\",\"email\":\"jill@here.com\"}]", app.home());
+    }
+
+    @Test
+    public void authenticatesTheUserAndSendsAJWT(){
+        assertEquals("token-here", app.authenticate("fred", "bill"));
+    }
+
+    @Test
+    public void failsToAuthenticateTheUserIfLDAPFails(){
+        assertEquals("FAILED TO AUTHENTICATE", failingApp.authenticate("fred", "bill"));
+    }
+}
+
+class MockAuthenticator implements Authenticator{
+
+    @Override
+    public boolean authenticate(String username, String password) {
+        return true;
+    }
+}
+
+class MockFailingAuthenticator implements Authenticator{
+
+    @Override
+    public boolean authenticate(String username, String password) {
+        return false;
+    }
+}
+
+class MockGenerator implements TokenGenerator{
+
+    @Override
+    public String generate(String username) {
+        return "token-here";
     }
 }
 
