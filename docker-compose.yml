@@ -5,13 +5,14 @@ services:
     build: .
     restart: always
     ports:
-      - "8080:8080"
+      - "8443:8443"
       - "8389:8389"
     env_file:
       - .env
     secrets:
       - public_key
       - private_key
+      - keystore
 
   db:
     image: mysql
@@ -26,3 +27,5 @@ secrets:
     file: ./secrets/public_key.pem
   private_key:
     file: ./secrets/private_key.pem
+  keystore:
+    file:  ./secrets/keystore
