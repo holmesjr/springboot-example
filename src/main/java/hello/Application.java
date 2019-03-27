@@ -25,6 +25,7 @@ import java.util.Base64;
 
 @SpringBootApplication
 @RestController
+@CrossOrigin(origins = "*")
 public class Application {
 
     @Autowired
