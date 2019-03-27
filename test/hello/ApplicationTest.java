@@ -42,19 +42,37 @@ public class ApplicationTest {
     @Test
     public void authenticatesTheUserAndSendsAJWT() throws InvalidKeySpecException, NoSuchAlgorithmException {
 
-        Mockito.when(authenticator.authenticate("fred", "bill")).thenReturn(true);
+        Mockito.when(authenticator.authenticate("fred", "good password")).thenReturn(true);
         Mockito.when(tokenGenerator.generate("fred")).thenReturn("token-here");
         Application app = new Application(repository, authenticator, tokenGenerator);
 
-        assertEquals("token-here", app.authenticate("fred", "bill"));
+        assertEquals("token-here", app.authenticate("fred", "good password"));
     }
 
     @Test
     public void failsToAuthenticateTheUserIfLDAPFails() throws InvalidKeySpecException, NoSuchAlgorithmException {
 
-        Mockito.when(authenticator.authenticate("fred", "bill")).thenReturn(false);
+        Mockito.when(authenticator.authenticate("fred", "bad password")).thenReturn(false);
+        Application app = new Application(repository, authenticator, tokenGenerator);
+
+        assertEquals("FAILED TO AUTHENTICATE", app.authenticate("fred", "bad password"));
+    }
+
+    @Test
+    public void failsToAuthenticateTheUserIfThereIsAnLDAPException() {
+
+        Mockito.when(authenticator.authenticate("fred", "bill")).thenThrow(NullPointerException.class);
         Application app = new Application(repository, authenticator, tokenGenerator);
 
         assertEquals("FAILED TO AUTHENTICATE", app.authenticate("fred", "bill"));
+    }
+
+    @Test
+    public void failsToAuthenticateTheUserIfThereIsAJWTException() throws InvalidKeySpecException, NoSuchAlgorithmException {
+        Mockito.when(authenticator.authenticate("fred", "good password")).thenReturn(true);
+        Mockito.when(tokenGenerator.generate("fred")).thenThrow(NullPointerException.class);
+        Application app = new Application(repository, authenticator, tokenGenerator);
+
+        assertEquals("FAILED TO AUTHENTICATE", app.authenticate("fred", "good password"));
     }
 }
