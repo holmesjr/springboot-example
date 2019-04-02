@@ -1,6 +1,7 @@
 package hello.services;
 import static org.junit.Assert.*;
 
+import hello.services.JWTGenerator;
 import org.junit.Test;
 
 import java.security.NoSuchAlgorithmException;
