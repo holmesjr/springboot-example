@@ -7,9 +7,6 @@ import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.ldap.test.unboundid.LdapTestUtils;
 
-import javax.naming.Name;
-import javax.naming.ldap.LdapName;
-
 import static org.junit.Assert.assertTrue;
 
 public class LdapAuthenticatorTest {
