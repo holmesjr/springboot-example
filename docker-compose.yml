@@ -22,6 +22,11 @@ services:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: db_example
 
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile-tests
+
 secrets:
   public_key:
     file: ./secrets/public_key.pem
