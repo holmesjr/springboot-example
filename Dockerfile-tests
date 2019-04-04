@@ -5,5 +5,4 @@ WORKDIR /opt/code
 COPY ./pom.xml .
 RUN mvn dependency:go-offline
 COPY . .
-CMD ["mvn", "test"]
 
